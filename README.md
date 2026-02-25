@@ -1,3 +1,25 @@
+# api.dekan.pro
+
+API backend для [dekan.pro](https://dekan.pro) — Laravel 12 REST API.
+
+## Использование с Unity
+
+Этот проект подходит для использования как **HTTP backend** для игр Unity:
+- REST API (JSON), CORS включен — Unity `UnityWebRequest` или `WebRequest` работают без доп. настроек
+- Сохранение данных (посты, пользователи, любая своя модель)
+- Лидерборды, облачные сохранения, аутентификация
+
+**Для каких задач подходит:**
+- Сохранение прогресса / настроек
+- Лидерборды и рейтинги
+- Простая аутентификация
+- Каталог контента (уровни, предметы)
+
+**Ограничения для мультиплеера в реальном времени:**
+- Нет WebSockets — для синхронизации в реальном времени нужен [Laravel Reverb](https://laravel.com/docs/reverb) или отдельный сервер (Mirror, Photon, Netcode и т.п.)
+
+---
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
