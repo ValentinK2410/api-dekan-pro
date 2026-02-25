@@ -19,6 +19,19 @@ API backend для [dekan.pro](https://dekan.pro) — Laravel 12 REST API.
 - `wss://api.dekan.pro/app` — для реалтайм-синхронизации (позиции, кубы, события)
 - Канал `game.world` — публичный, подписка из Unity
 
+### API аутентификации и прогресса
+
+| Метод | URL | Описание |
+|-------|-----|----------|
+| POST | `/api/auth/register` | Регистрация (name, email, password) |
+| POST | `/api/auth/login` | Вход (email, password) → token |
+| GET | `/api/auth/me` | Текущий пользователь (Bearer) |
+| POST | `/api/auth/logout` | Выход (Bearer) |
+| GET | `/api/progress` | Прогресс (Bearer) → coins, last_save_utc |
+| PUT | `/api/progress` | Сохранить прогресс (Bearer) → coins |
+
+**Миграция:** `php artisan migrate` — создаёт таблицу `game_progress`.
+
 ### Деплой Reverb на сервер
 
 1. **Composer:** `composer install` (подтянет laravel/reverb)

@@ -31,3 +31,49 @@ nohup php artisan reverb:start --host=0.0.0.0 --port=8081 >> /var/log/reverb.log
 
 - WebSocket: wss://api.dekan.pro/app
 - Лог: `journalctl -u reverb-api-dekan -f`
+
+---
+
+## Устранение 404 на `/api/*`
+
+Если `POST /api/auth/register` возвращает 404:
+
+### 1. Проверить наличие файлов
+
+```bash
+cd /var/www/www-root/data/www/api.dekan.pro
+ls -la routes/api.php bootstrap/app.php
+```
+
+### 2. Очистить кэш и проверить маршруты
+
+```bash
+php artisan config:clear
+php artisan route:clear
+php artisan route:list
+```
+
+Убедитесь, что в списке есть `POST api/auth/register`, `POST api/auth/login` и т.д.
+
+### 3. Nginx — убедиться, что Laravel получает запросы
+
+В блоке `location /` (или `server`) для api.dekan.pro должна быть директива:
+
+```nginx
+location / {
+    try_files $uri $uri/ /index.php?$query_string;
+}
+```
+
+И секция `location ~ \.php$` для FastCGI. Без этого запросы к `/api/auth/register` не попадают в Laravel.
+
+### 4. Деплой свежего кода
+
+```bash
+cd /var/www/www-root/data/www/api.dekan.pro
+git pull  # или залить файлы вручную
+composer install --no-dev
+php artisan migrate --force
+php artisan config:clear
+php artisan route:clear
+```
