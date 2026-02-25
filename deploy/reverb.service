@@ -1,0 +1,14 @@
+[Unit]
+Description=Laravel Reverb WebSocket Server - api.dekan.pro
+After=network.target
+
+[Service]
+Type=simple
+User=www-root
+WorkingDirectory=/var/www/www-root/data/www/api.dekan.pro
+ExecStart=/usr/bin/php /var/www/www-root/data/www/api.dekan.pro/artisan reverb:start --host=0.0.0.0 --port=8081
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target

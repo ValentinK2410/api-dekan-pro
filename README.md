@@ -15,8 +15,36 @@ API backend для [dekan.pro](https://dekan.pro) — Laravel 12 REST API.
 - Простая аутентификация
 - Каталог контента (уровни, предметы)
 
-**Ограничения для мультиплеера в реальном времени:**
-- Нет WebSockets — для синхронизации в реальном времени нужен [Laravel Reverb](https://laravel.com/docs/reverb) или отдельный сервер (Mirror, Photon, Netcode и т.п.)
+**WebSocket (Laravel Reverb):**
+- `wss://api.dekan.pro/app` — для реалтайм-синхронизации (позиции, кубы, события)
+- Канал `game.world` — публичный, подписка из Unity
+
+### Деплой Reverb на сервер
+
+1. **Composer:** `composer install` (подтянет laravel/reverb)
+2. **.env** — добавить/проверить:
+   ```
+   BROADCAST_CONNECTION=reverb
+   REVERB_APP_ID=api-dekan-pro
+   REVERB_APP_KEY=<сгенерировать>
+   REVERB_APP_SECRET=<сгенерировать>
+   REVERB_HOST=api.dekan.pro
+   REVERB_PORT=443
+   REVERB_SCHEME=https
+   REVERB_SERVER_HOST=0.0.0.0
+   REVERB_SERVER_PORT=8080
+   ```
+3. **Nginx** — в HTTPS server block добавить:
+   ```nginx
+   location /app {
+       proxy_http_version 1.1;
+       proxy_set_header Upgrade $http_upgrade;
+       proxy_set_header Connection "Upgrade";
+       proxy_set_header Host $http_host;
+       proxy_pass http://127.0.0.1:8080;
+   }
+   ```
+4. **Запуск Reverb:** `php artisan reverb:start` (через Supervisor в production)
 
 ---
 
