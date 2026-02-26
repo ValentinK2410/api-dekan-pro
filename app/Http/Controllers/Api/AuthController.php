@@ -45,6 +45,54 @@ class AuthController extends Controller
     }
 
     /**
+     * Единый вход: если пользователь есть — логин, иначе — регистрация.
+     *
+     * @bodyParam email string required
+     * @bodyParam password string required
+     * @bodyParam name string optional Имя при регистрации (иначе из email)
+     */
+    public function connect(Request $request): JsonResponse
+    {
+        $request->validate([
+            'email' => ['required', 'string', 'email', 'max:255'],
+            'password' => ['required', 'string'],
+            'name' => ['nullable', 'string', 'max:255'],
+        ]);
+        $validated = $request->only('email', 'password', 'name');
+
+        $user = User::where('email', $validated['email'])->first();
+
+        if ($user) {
+            if (!Hash::check($validated['password'], $user->password)) {
+                throw ValidationException::withMessages([
+                    'email' => ['Неверный пароль.'],
+                ]);
+            }
+        } else {
+            $request->validate(['password' => ['min:8']]);
+            $name = !empty($validated['name']) ? $validated['name'] : (explode('@', $validated['email'])[0] ?? 'Player');
+            $user = User::create([
+                'name' => $name,
+                'email' => $validated['email'],
+                'password' => Hash::make($validated['password']),
+            ]);
+        }
+
+        $user->tokens()->where('name', 'unity-game')->delete();
+        $token = $user->createToken('unity-game')->plainTextToken;
+
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+            ],
+            'token' => $token,
+            'token_type' => 'Bearer',
+        ]);
+    }
+
+    /**
      * @bodyParam email string required Example: player@example.com
      * @bodyParam password string required Example: password123
      */

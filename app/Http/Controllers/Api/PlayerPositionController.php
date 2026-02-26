@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\GameProgress;
+use App\Models\GameSession;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -80,6 +81,17 @@ class PlayerPositionController extends Controller
             'extra' => $extra,
             'last_save_at' => now(),
         ]);
+
+        // Обновить позицию в игровой сессии (для мультиплеера через API)
+        $session = GameSession::where('user_id', $request->user()->id)->first();
+        if ($session) {
+            $session->update([
+                'position' => $extra['position'] ?? $session->position,
+                'rotation' => $extra['rotation'] ?? $session->rotation,
+                'scene' => $extra['scene'] ?? $session->scene,
+                'last_seen_at' => now(),
+            ]);
+        }
 
         return response()->json([
             'position' => $extra['position'] ?? null,
