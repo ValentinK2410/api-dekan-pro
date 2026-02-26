@@ -21,7 +21,7 @@ class ProgressController extends Controller
 
         return response()->json([
             'coins' => (float) $progress->coins,
-            'last_save_utc' => $progress->last_save_at?->toIso8601String() ?? '',
+            'last_save_utc' => $progress->last_save_at ? $progress->last_save_at->toIso8601String() : '',
             'extra' => $progress->extra ?? [],
         ]);
     }
