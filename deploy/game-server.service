@@ -1,0 +1,14 @@
+[Unit]
+Description=MultiplayerPersona Game Server - api.dekan.pro
+After=network.target
+
+[Service]
+Type=simple
+User=www-root
+WorkingDirectory=/var/www/www-root/data/www/api.dekan.pro/game-server
+ExecStart=/var/www/www-root/data/www/api.dekan.pro/game-server/MultiplayerPersonaServer.x86_64 -batchmode -nographics
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

@@ -34,6 +34,19 @@ nohup php artisan reverb:start --host=0.0.0.0 --port=8081 >> /var/log/reverb.log
 
 ---
 
+## Игровой сервер (MultiplayerPersona)
+
+Работает в той же папке api.dekan.pro, порт 7778.
+
+1. Собрать в Unity: **Build → Build Dedicated Server (Linux)**
+2. Скопировать: `scp -r Builds/LinuxServer/* user@api.dekan.pro:/var/www/www-root/data/www/api.dekan.pro/game-server/`
+3. Запустить: `sudo bash deploy/setup-game-server.sh`
+4. Открыть порт: `sudo ufw allow 7778/udp && sudo ufw allow 7778/tcp`
+
+Подробнее: [DEPLOY_GAME_SERVER.md](DEPLOY_GAME_SERVER.md)
+
+---
+
 ## Устранение 404 на `/api/*`
 
 Если `POST /api/auth/register` возвращает 404:

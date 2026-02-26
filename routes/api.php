@@ -1,6 +1,8 @@
 <?php
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\NetworkController;
+use App\Http\Controllers\Api\PlayerPositionController;
 use App\Http\Controllers\Api\ProgressController;
 use Illuminate\Support\Facades\Route;
 
@@ -12,10 +14,13 @@ use Illuminate\Support\Facades\Route;
 
 Route::post('/auth/register', [AuthController::class, 'register']);
 Route::post('/auth/login', [AuthController::class, 'login']);
+Route::get('/network/my-ip', [NetworkController::class, 'myIp']);
 
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/auth/me', [AuthController::class, 'me']);
     Route::post('/auth/logout', [AuthController::class, 'logout']);
     Route::get('/progress', [ProgressController::class, 'show']);
     Route::put('/progress', [ProgressController::class, 'update']);
+    Route::get('/player/position', [PlayerPositionController::class, 'show']);
+    Route::put('/player/position', [PlayerPositionController::class, 'update']);
 });
