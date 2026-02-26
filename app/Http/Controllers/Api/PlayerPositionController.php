@@ -56,6 +56,17 @@ class PlayerPositionController extends Controller
             'velocity.y' => ['sometimes', 'numeric'],
             'velocity.z' => ['sometimes', 'numeric'],
             'scene' => ['sometimes', 'string', 'max:255'],
+            'carried_cube_index' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:255'],
+            'cube_position' => ['sometimes', 'array'],
+            'cube_position.x' => ['sometimes', 'numeric'],
+            'cube_position.y' => ['sometimes', 'numeric'],
+            'cube_position.z' => ['sometimes', 'numeric'],
+            'cube_rotation' => ['sometimes', 'array'],
+            'cube_rotation.x' => ['sometimes', 'numeric'],
+            'cube_rotation.y' => ['sometimes', 'numeric'],
+            'cube_rotation.z' => ['sometimes', 'numeric'],
+            'cube_rotation.w' => ['sometimes', 'numeric'],
+            'focused_cube_index' => ['sometimes', 'nullable', 'integer', 'min:0', 'max:255'],
         ]);
 
         $progress = GameProgress::firstOrCreate(
@@ -82,15 +93,33 @@ class PlayerPositionController extends Controller
             'last_save_at' => now(),
         ]);
 
-        // Обновить позицию в игровой сессии (для мультиплеера через API)
+        // Обновить позицию и состояние кубов в игровой сессии (для мультиплеера через API)
         $session = GameSession::where('user_id', $request->user()->id)->first();
         if ($session) {
-            $session->update([
+            $update = [
                 'position' => $extra['position'] ?? $session->position,
                 'rotation' => $extra['rotation'] ?? $session->rotation,
                 'scene' => $extra['scene'] ?? $session->scene,
                 'last_seen_at' => now(),
-            ]);
+            ];
+            if (array_key_exists('carried_cube_index', $validated)) {
+                $carried = $validated['carried_cube_index'] ?? null;
+                $update['carried_cube_index'] = $carried;
+                if ($carried === null) {
+                    $update['cube_position'] = null;
+                    $update['cube_rotation'] = null;
+                }
+            }
+            if (isset($validated['cube_position'])) {
+                $update['cube_position'] = $validated['cube_position'];
+            }
+            if (isset($validated['cube_rotation'])) {
+                $update['cube_rotation'] = $validated['cube_rotation'];
+            }
+            if (array_key_exists('focused_cube_index', $validated)) {
+                $update['focused_cube_index'] = $validated['focused_cube_index'] ?? null;
+            }
+            $session->update($update);
         }
 
         return response()->json([

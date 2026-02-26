@@ -15,6 +15,10 @@ class GameSession extends Model
         'position',
         'rotation',
         'scene',
+        'carried_cube_index',
+        'cube_position',
+        'cube_rotation',
+        'focused_cube_index',
         'last_seen_at',
     ];
 
@@ -23,6 +27,8 @@ class GameSession extends Model
         return [
             'position' => 'array',
             'rotation' => 'array',
+            'cube_position' => 'array',
+            'cube_rotation' => 'array',
             'last_seen_at' => 'datetime',
         ];
     }

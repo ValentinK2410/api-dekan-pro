@@ -69,6 +69,10 @@ class GameSessionController extends Controller
                 'position' => $s->position,
                 'rotation' => $s->rotation,
                 'scene' => $s->scene,
+                'carried_cube_index' => $s->carried_cube_index,
+                'cube_position' => $s->cube_position,
+                'cube_rotation' => $s->cube_rotation,
+                'focused_cube_index' => $s->focused_cube_index,
                 'last_seen_at' => $s->last_seen_at->toIso8601String(),
             ]);
 
