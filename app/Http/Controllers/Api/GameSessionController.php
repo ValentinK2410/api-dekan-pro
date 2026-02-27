@@ -97,10 +97,18 @@ class GameSessionController extends Controller
             }
         }
 
+        $collectedUnion = [];
+        foreach ($allSessions as $s) {
+            $arr = is_array($s->collected_collectible_indices) ? $s->collected_collectible_indices : [];
+            $collectedUnion = array_merge($collectedUnion, $arr);
+        }
+        $collectedUnion = array_values(array_unique($collectedUnion));
+
         return response()->json([
             'players' => $players,
             'solved_platform_indices' => $solvedUnion,
             'platform_sums' => $platformSums,
+            'collected_collectible_indices' => $collectedUnion,
         ]);
     }
 }

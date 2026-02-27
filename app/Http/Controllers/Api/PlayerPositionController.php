@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\GameSessionUpdated;
 use App\Http\Controllers\Controller;
 use App\Models\GameProgress;
 use App\Models\GameSession;
@@ -79,6 +80,8 @@ class PlayerPositionController extends Controller
             'solved_platform_indices.*' => ['integer', 'min:0', 'max:255'],
             'platform_contributions' => ['sometimes', 'array'],
             'platform_contributions.*' => ['integer', 'min:0', 'max:999'],
+            'collected_collectible_indices' => ['sometimes', 'array'],
+            'collected_collectible_indices.*' => ['integer', 'min:0', 'max:511'],
         ]);
 
         $progress = GameProgress::firstOrCreate(
@@ -124,6 +127,12 @@ class PlayerPositionController extends Controller
             'scene' => $extra['scene'] ?? $session->scene,
             'last_seen_at' => now(),
         ];
+        if (isset($validated['position'])) {
+            $update['position'] = $validated['position'];
+        }
+        if (isset($validated['rotation'])) {
+            $update['rotation'] = $validated['rotation'];
+        }
         if (array_key_exists('carried_cube_index', $validated)) {
             $carried = $validated['carried_cube_index'] ?? null;
             $update['carried_cube_index'] = $carried;
@@ -150,7 +159,29 @@ class PlayerPositionController extends Controller
             $contrib = $validated['platform_contributions'] ?? [];
             $update['platform_contributions'] = is_array($contrib) ? $contrib : [];
         }
+        if (array_key_exists('collected_collectible_indices', $validated)) {
+            $coll = $validated['collected_collectible_indices'] ?? [];
+            $existing = is_array($session->collected_collectible_indices) ? $session->collected_collectible_indices : [];
+            $update['collected_collectible_indices'] = array_values(array_unique(array_merge($existing, $coll)));
+        }
         $session->update($update);
+
+        // Мгновенная рассылка другим клиентам через Reverb (без ожидания следующего poll)
+        GameSessionUpdated::dispatch(
+            $session->user_id,
+            $session->player_name,
+            $session->position,
+            $session->rotation,
+            $session->scene,
+            $session->carried_cube_index,
+            $session->cube_position,
+            $session->cube_rotation,
+            $session->focused_cube_index,
+            is_array($session->solved_platform_indices) ? $session->solved_platform_indices : [],
+            is_array($session->platform_contributions) ? $session->platform_contributions : [],
+            is_array($session->collected_collectible_indices) ? $session->collected_collectible_indices : [],
+        );
+
 
         return response()->json([
             'position' => $extra['position'] ?? null,
