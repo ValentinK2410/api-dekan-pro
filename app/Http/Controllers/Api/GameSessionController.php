@@ -73,9 +73,34 @@ class GameSessionController extends Controller
                 'cube_position' => $s->cube_position,
                 'cube_rotation' => $s->cube_rotation,
                 'focused_cube_index' => $s->focused_cube_index,
+                'solved_platform_indices' => $s->solved_platform_indices ?? [],
                 'last_seen_at' => $s->last_seen_at->toIso8601String(),
             ]);
 
-        return response()->json(['players' => $players]);
+        // Объединение решённых площадок всех игроков (включая текущего) для синхронизации уровня
+        $currentSession = GameSession::where('user_id', $currentUserId)->first();
+        $allSessions = GameSession::where('last_seen_at', '>=', $stale)->get();
+        $solvedUnion = [];
+        foreach ($allSessions as $s) {
+            $arr = is_array($s->solved_platform_indices) ? $s->solved_platform_indices : [];
+            $solvedUnion = array_merge($solvedUnion, $arr);
+        }
+        $solvedUnion = array_values(array_unique($solvedUnion));
+
+        // Сумма на площадках = объединение вкладов всех игроков (игрок 1 положил 3, игрок 2 — 7 → сумма 10)
+        $platformSums = [];
+        foreach ($allSessions as $s) {
+            $contrib = is_array($s->platform_contributions) ? $s->platform_contributions : [];
+            foreach ($contrib as $platformIdx => $value) {
+                $k = (string) $platformIdx;
+                $platformSums[$k] = ($platformSums[$k] ?? 0) + (int) $value;
+            }
+        }
+
+        return response()->json([
+            'players' => $players,
+            'solved_platform_indices' => $solvedUnion,
+            'platform_sums' => $platformSums,
+        ]);
     }
 }

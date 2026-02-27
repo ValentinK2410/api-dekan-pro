@@ -19,6 +19,8 @@ class GameSession extends Model
         'cube_position',
         'cube_rotation',
         'focused_cube_index',
+        'solved_platform_indices',
+        'platform_contributions',
         'last_seen_at',
     ];
 
@@ -29,6 +31,8 @@ class GameSession extends Model
             'rotation' => 'array',
             'cube_position' => 'array',
             'cube_rotation' => 'array',
+            'solved_platform_indices' => 'array',
+            'platform_contributions' => 'array',
             'last_seen_at' => 'datetime',
         ];
     }
